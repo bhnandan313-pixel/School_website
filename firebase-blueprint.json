@@ -1,0 +1,390 @@
+{
+  "entities": {
+    "Student": {
+      "title": "Student",
+      "description": "Core student profile, academic enrollment details, and guardian contact information.",
+      "type": "object",
+      "properties": {
+        "ownerUid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Firebase Auth UID of the student owner."
+        },
+        "studentCode": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 32,
+          "pattern": "^[A-Z0-9\\-]+$",
+          "description": "Official institutional student ID code (e.g., NB-2026-0418)."
+        },
+        "fullName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        "preferredName": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 60
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 120
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 30
+        },
+        "address": {
+          "type": "string",
+          "maxLength": 240
+        },
+        "gradeLevel": {
+          "type": "string",
+          "enum": ["Grade 9", "Grade 10", "Grade 11", "Grade 12"]
+        },
+        "section": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "house": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "advisorName": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "enrollmentDate": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "dateOfBirth": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "guardianName": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "guardianPhone": {
+          "type": "string",
+          "maxLength": 30
+        },
+        "guardianEmail": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "bio": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "avatarUrl": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "academicStanding": {
+          "type": "string",
+          "enum": ["Honors Roll", "Good Standing", "Academic Watch"]
+        },
+        "role": {
+          "type": "string",
+          "enum": ["student"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ownerUid",
+        "studentCode",
+        "fullName",
+        "email",
+        "gradeLevel",
+        "section",
+        "advisorName",
+        "enrollmentDate",
+        "academicStanding",
+        "role",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "AttendanceRecord": {
+      "title": "AttendanceRecord",
+      "description": "Single course session attendance entry for a student.",
+      "type": "object",
+      "properties": {
+        "studentId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerUid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "courseCode": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 20
+        },
+        "courseName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "period": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 30
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Present", "Absent", "Late", "Excused"]
+        },
+        "remarks": {
+          "type": "string",
+          "maxLength": 240
+        },
+        "recordedBy": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "studentId",
+        "ownerUid",
+        "courseCode",
+        "courseName",
+        "date",
+        "period",
+        "status",
+        "recordedBy",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "MarkEntry": {
+      "title": "MarkEntry",
+      "description": "Assessment or examination grade entry for a student in a course.",
+      "type": "object",
+      "properties": {
+        "studentId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerUid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "courseCode": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 20
+        },
+        "courseName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        "term": {
+          "type": "string",
+          "enum": ["Fall 2026", "Spring 2026"]
+        },
+        "assessmentTitle": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "assessmentType": {
+          "type": "string",
+          "enum": ["Exam", "Quiz", "Assignment", "Lab", "Project"]
+        },
+        "score": {
+          "type": "number"
+        },
+        "maxScore": {
+          "type": "number"
+        },
+        "weightPct": {
+          "type": "number"
+        },
+        "teacherName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "gradedDate": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "feedback": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "studentId",
+        "ownerUid",
+        "courseCode",
+        "courseName",
+        "term",
+        "assessmentTitle",
+        "assessmentType",
+        "score",
+        "maxScore",
+        "weightPct",
+        "teacherName",
+        "gradedDate",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Course": {
+      "title": "Course",
+      "description": "Catalog of active academic courses offered in the current school year.",
+      "type": "object",
+      "properties": {
+        "courseCode": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 20
+        },
+        "courseName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        "department": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 60
+        },
+        "instructor": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "credits": {
+          "type": "number"
+        },
+        "schedule": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 60
+        },
+        "room": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 30
+        }
+      },
+      "required": [
+        "courseCode",
+        "courseName",
+        "department",
+        "instructor",
+        "credits",
+        "schedule",
+        "room"
+      ]
+    },
+    "Announcement": {
+      "title": "Announcement",
+      "description": "School-wide academic notices, exam schedules, and calendar reminders.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 140
+        },
+        "category": {
+          "type": "string",
+          "enum": ["Academic", "Examination", "Campus", "Deadline"]
+        },
+        "dateLabel": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 40
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 320
+        },
+        "author": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80
+        }
+      },
+      "required": [
+        "title",
+        "category",
+        "dateLabel",
+        "summary",
+        "author"
+      ]
+    }
+  },
+  "firestore": {
+    "/students/{studentId}": {
+      "schema": { "$ref": "#/entities/Student" },
+      "description": "Student profile documents containing PII and enrollment metadata. Restricted to owner or verified school administrator."
+    },
+    "/attendance/{recordId}": {
+      "schema": { "$ref": "#/entities/AttendanceRecord" },
+      "description": "Per-session student attendance logs. Students can read their own and update excuse remarks; administrators can manage all entries."
+    },
+    "/marks/{markId}": {
+      "schema": { "$ref": "#/entities/MarkEntry" },
+      "description": "Student assessment and exam scores. Students can read their own; administrators can create and update grades."
+    },
+    "/courses/{courseId}": {
+      "schema": { "$ref": "#/entities/Course" },
+      "description": "Public school course catalog readable by any authenticated student or faculty member."
+    },
+    "/announcements/{announcementId}": {
+      "schema": { "$ref": "#/entities/Announcement" },
+      "description": "School academic notices readable by any authenticated student or faculty member."
+    }
+  }
+}

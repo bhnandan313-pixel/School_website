@@ -1,0 +1,372 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global safety net: default deny everything
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Core identity and validation primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email == 'nandanbh4@gmail.com';
+    }
+
+    function isValidDateString(val) {
+      return val is string && val.size() == 10 && val.matches('^\\d{4}-\\d{2}-\\d{2}$');
+    }
+
+    // Student entity validation blueprint
+    function isValidStudent(data) {
+      return data.keys().hasAll([
+          'ownerUid',
+          'studentCode',
+          'fullName',
+          'email',
+          'gradeLevel',
+          'section',
+          'advisorName',
+          'enrollmentDate',
+          'academicStanding',
+          'role',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'ownerUid',
+          'studentCode',
+          'fullName',
+          'preferredName',
+          'email',
+          'phone',
+          'address',
+          'gradeLevel',
+          'section',
+          'house',
+          'advisorName',
+          'enrollmentDate',
+          'dateOfBirth',
+          'guardianName',
+          'guardianPhone',
+          'guardianEmail',
+          'bio',
+          'avatarUrl',
+          'academicStanding',
+          'role',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        isValidId(data.ownerUid) &&
+        data.studentCode is string && data.studentCode.size() >= 3 && data.studentCode.size() <= 32 && data.studentCode.matches('^[A-Z0-9\\-]+$') &&
+        data.fullName is string && data.fullName.size() >= 2 && data.fullName.size() <= 100 &&
+        (!('preferredName' in data) || (data.preferredName is string && data.preferredName.size() <= 60)) &&
+        data.email is string && data.email.size() >= 3 && data.email.size() <= 120 &&
+        (!('phone' in data) || (data.phone is string && data.phone.size() <= 30)) &&
+        (!('address' in data) || (data.address is string && data.address.size() <= 240)) &&
+        data.gradeLevel in ['Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'] &&
+        data.section is string && data.section.size() >= 1 && data.section.size() <= 20 &&
+        (!('house' in data) || (data.house is string && data.house.size() <= 40)) &&
+        data.advisorName is string && data.advisorName.size() >= 2 && data.advisorName.size() <= 80 &&
+        isValidDateString(data.enrollmentDate) &&
+        (!('dateOfBirth' in data) || (data.dateOfBirth is string && data.dateOfBirth.size() <= 20)) &&
+        (!('guardianName' in data) || (data.guardianName is string && data.guardianName.size() <= 100)) &&
+        (!('guardianPhone' in data) || (data.guardianPhone is string && data.guardianPhone.size() <= 30)) &&
+        (!('guardianEmail' in data) || (data.guardianEmail is string && data.guardianEmail.size() <= 120)) &&
+        (!('bio' in data) || (data.bio is string && data.bio.size() <= 400)) &&
+        (!('avatarUrl' in data) || (data.avatarUrl is string && data.avatarUrl.size() <= 500)) &&
+        data.academicStanding in ['Honors Roll', 'Good Standing', 'Academic Watch'] &&
+        data.role == 'student' &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    // AttendanceRecord entity validation blueprint
+    function isValidAttendance(data) {
+      return data.keys().hasAll([
+          'studentId',
+          'ownerUid',
+          'courseCode',
+          'courseName',
+          'date',
+          'period',
+          'status',
+          'recordedBy',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'studentId',
+          'ownerUid',
+          'courseCode',
+          'courseName',
+          'date',
+          'period',
+          'status',
+          'remarks',
+          'recordedBy',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        isValidId(data.studentId) &&
+        isValidId(data.ownerUid) &&
+        data.courseCode is string && data.courseCode.size() >= 2 && data.courseCode.size() <= 20 &&
+        data.courseName is string && data.courseName.size() >= 2 && data.courseName.size() <= 100 &&
+        isValidDateString(data.date) &&
+        data.period is string && data.period.size() >= 1 && data.period.size() <= 30 &&
+        data.status in ['Present', 'Absent', 'Late', 'Excused'] &&
+        (!('remarks' in data) || (data.remarks is string && data.remarks.size() <= 240)) &&
+        data.recordedBy is string && data.recordedBy.size() >= 1 && data.recordedBy.size() <= 80 &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    // MarkEntry entity validation blueprint
+    function isValidMark(data) {
+      return data.keys().hasAll([
+          'studentId',
+          'ownerUid',
+          'courseCode',
+          'courseName',
+          'term',
+          'assessmentTitle',
+          'assessmentType',
+          'score',
+          'maxScore',
+          'weightPct',
+          'teacherName',
+          'gradedDate',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'studentId',
+          'ownerUid',
+          'courseCode',
+          'courseName',
+          'term',
+          'assessmentTitle',
+          'assessmentType',
+          'score',
+          'maxScore',
+          'weightPct',
+          'teacherName',
+          'gradedDate',
+          'feedback',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        isValidId(data.studentId) &&
+        isValidId(data.ownerUid) &&
+        data.courseCode is string && data.courseCode.size() >= 2 && data.courseCode.size() <= 20 &&
+        data.courseName is string && data.courseName.size() >= 2 && data.courseName.size() <= 100 &&
+        data.term in ['Fall 2026', 'Spring 2026'] &&
+        data.assessmentTitle is string && data.assessmentTitle.size() >= 2 && data.assessmentTitle.size() <= 120 &&
+        data.assessmentType in ['Exam', 'Quiz', 'Assignment', 'Lab', 'Project'] &&
+        data.score is number && data.score >= 0 &&
+        data.maxScore is number && data.maxScore >= 1 && data.maxScore <= 1000 &&
+        data.score <= data.maxScore &&
+        data.weightPct is number && data.weightPct >= 0 && data.weightPct <= 100 &&
+        data.teacherName is string && data.teacherName.size() >= 2 && data.teacherName.size() <= 80 &&
+        isValidDateString(data.gradedDate) &&
+        (!('feedback' in data) || (data.feedback is string && data.feedback.size() <= 400)) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    // Course entity validation blueprint
+    function isValidCourse(data) {
+      return data.keys().hasAll([
+          'courseCode',
+          'courseName',
+          'department',
+          'instructor',
+          'credits',
+          'schedule',
+          'room'
+        ]) &&
+        data.keys().hasOnly([
+          'courseCode',
+          'courseName',
+          'department',
+          'instructor',
+          'credits',
+          'schedule',
+          'room'
+        ]) &&
+        data.courseCode is string && data.courseCode.size() >= 2 && data.courseCode.size() <= 20 &&
+        data.courseName is string && data.courseName.size() >= 2 && data.courseName.size() <= 100 &&
+        data.department is string && data.department.size() >= 2 && data.department.size() <= 60 &&
+        data.instructor is string && data.instructor.size() >= 2 && data.instructor.size() <= 80 &&
+        data.credits is number && data.credits >= 0.5 && data.credits <= 10 &&
+        data.schedule is string && data.schedule.size() >= 2 && data.schedule.size() <= 60 &&
+        data.room is string && data.room.size() >= 1 && data.room.size() <= 30;
+    }
+
+    // Announcement entity validation blueprint
+    function isValidAnnouncement(data) {
+      return data.keys().hasAll([
+          'title',
+          'category',
+          'dateLabel',
+          'summary',
+          'author'
+        ]) &&
+        data.keys().hasOnly([
+          'title',
+          'category',
+          'dateLabel',
+          'summary',
+          'author'
+        ]) &&
+        data.title is string && data.title.size() >= 2 && data.title.size() <= 140 &&
+        data.category in ['Academic', 'Examination', 'Campus', 'Deadline'] &&
+        data.dateLabel is string && data.dateLabel.size() >= 2 && data.dateLabel.size() <= 40 &&
+        data.summary is string && data.summary.size() >= 2 && data.summary.size() <= 320 &&
+        data.author is string && data.author.size() >= 2 && data.author.size() <= 80;
+    }
+
+    // 1. Students Collection (contains PII - strictly owner or admin)
+    match /students/{studentId} {
+      allow get: if isSignedIn() && isValidId(studentId) && (isAdmin() || existing().ownerUid == request.auth.uid);
+      allow list: if isSignedIn() && (isAdmin() || resource.data.ownerUid == request.auth.uid);
+
+      allow create: if isSignedIn() &&
+        isValidId(studentId) &&
+        isValidStudent(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time &&
+        (
+          isAdmin() ||
+          (studentId == request.auth.uid && incoming().ownerUid == request.auth.uid)
+        );
+
+      allow update: if isSignedIn() &&
+        isValidId(studentId) &&
+        isValidStudent(incoming()) &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().ownerUid == existing().ownerUid &&
+        incoming().role == existing().role &&
+        incoming().updatedAt == request.time &&
+        (
+          isAdmin() ||
+          (
+            existing().ownerUid == request.auth.uid &&
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'preferredName',
+              'phone',
+              'address',
+              'dateOfBirth',
+              'guardianName',
+              'guardianPhone',
+              'guardianEmail',
+              'bio',
+              'avatarUrl',
+              'updatedAt'
+            ])
+          )
+        );
+
+      allow delete: if isAdmin() && isValidId(studentId);
+    }
+
+    // 2. Attendance Collection
+    match /attendance/{recordId} {
+      allow get: if isSignedIn() && isValidId(recordId) && (isAdmin() || existing().ownerUid == request.auth.uid);
+      allow list: if isSignedIn() && (isAdmin() || resource.data.ownerUid == request.auth.uid);
+
+      allow create: if isSignedIn() &&
+        isValidId(recordId) &&
+        isValidAttendance(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time &&
+        exists(/databases/$(database)/documents/students/$(incoming().studentId)) &&
+        (
+          isAdmin() ||
+          (
+            incoming().ownerUid == request.auth.uid &&
+            get(/databases/$(database)/documents/students/$(incoming().studentId)).data.ownerUid == request.auth.uid
+          )
+        );
+
+      allow update: if isSignedIn() &&
+        isValidId(recordId) &&
+        isValidAttendance(incoming()) &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().studentId == existing().studentId &&
+        incoming().ownerUid == existing().ownerUid &&
+        incoming().updatedAt == request.time &&
+        (
+          isAdmin() ||
+          (
+            existing().ownerUid == request.auth.uid &&
+            incoming().diff(existing()).affectedKeys().hasOnly(['remarks', 'updatedAt'])
+          )
+        );
+
+      allow delete: if isAdmin() && isValidId(recordId);
+    }
+
+    // 3. Marks Collection
+    match /marks/{markId} {
+      allow get: if isSignedIn() && isValidId(markId) && (isAdmin() || existing().ownerUid == request.auth.uid);
+      allow list: if isSignedIn() && (isAdmin() || resource.data.ownerUid == request.auth.uid);
+
+      allow create: if isSignedIn() &&
+        isValidId(markId) &&
+        isValidMark(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time &&
+        exists(/databases/$(database)/documents/students/$(incoming().studentId)) &&
+        (
+          isAdmin() ||
+          (
+            incoming().ownerUid == request.auth.uid &&
+            get(/databases/$(database)/documents/students/$(incoming().studentId)).data.ownerUid == request.auth.uid
+          )
+        );
+
+      allow update: if isAdmin() &&
+        isValidId(markId) &&
+        isValidMark(incoming()) &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().studentId == existing().studentId &&
+        incoming().ownerUid == existing().ownerUid &&
+        incoming().updatedAt == request.time;
+
+      allow delete: if isAdmin() && isValidId(markId);
+    }
+
+    // 4. Courses Catalog (No PII)
+    match /courses/{courseId} {
+      allow get: if isSignedIn() && isValidId(courseId);
+      allow list: if isSignedIn();
+      allow create, update: if isAdmin() && isValidId(courseId) && isValidCourse(incoming());
+      allow delete: if isAdmin() && isValidId(courseId);
+    }
+
+    // 5. Announcements (No PII)
+    match /announcements/{announcementId} {
+      allow get: if isSignedIn() && isValidId(announcementId);
+      allow list: if isSignedIn();
+      allow create, update: if isAdmin() && isValidId(announcementId) && isValidAnnouncement(incoming());
+      allow delete: if isAdmin() && isValidId(announcementId);
+    }
+  }
+}

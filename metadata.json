@@ -1,0 +1,8 @@
+{
+  "name": "Northbridge Academy Portal",
+  "description": "School management application featuring student login, academic dashboard, attendance tracking, marks ledger, and student profile management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
